@@ -1,0 +1,64 @@
+package com.dev.unitests.repository;
+
+import com.dev.unitests.model.entity.Book;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+@ExtendWith(SpringExtension.class)
+@ActiveProfiles("test")
+@DataJpaTest //indica que vou fazer testes com JPA, cria instancia de banco em memoria para testes e ao final apaga tudo
+public class BookRepositoryTest {
+
+    @Autowired
+    TestEntityManager entityManager;
+
+    @Autowired
+    BookRepository bookRepository;
+
+    @Test
+    @DisplayName("Deve retornar verdadeiro quando existir um livro na base com o isbn informado")
+    public void returnTrueWhenIsbnExists() {
+        //cenario
+        String isbn = "123";
+        Book book = createNewBook(isbn);
+        entityManager.persist(book);
+
+        //execucao
+        boolean exists = bookRepository.existsByIsbn(isbn);
+
+        //verificacao
+        assertTrue(exists);
+    }
+
+    @Test
+    @DisplayName("Deve retornar falso quando existir um livro na base com o isbn informado")
+    public void returnFalseWhenIsbnExists() {
+        //cenario
+        String isbn = "123";
+
+        //execucao
+        boolean exists = bookRepository.existsByIsbn(isbn);
+
+        //verificacao
+        assertFalse(exists);
+    }
+
+    private Book getBook() {
+        return Book.builder().author("Artur").title("As aventuras").isbn("123").build();
+    }
+
+    public static Book createNewBook(String isbn) {
+        return Book.builder().title("Aventuras").author("Fulano").isbn(isbn).build();
+    }
+
+}
+
