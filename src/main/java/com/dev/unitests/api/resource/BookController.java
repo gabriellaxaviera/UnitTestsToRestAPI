@@ -7,8 +7,10 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/books")
@@ -24,5 +26,12 @@ public class BookController {
         Book entity = modelMapper.map(dto, Book.class);
         entity = service.save(entity);
         return modelMapper.map(entity, BookDTO.class);
+    }
+
+    @GetMapping("/{id}")
+    public BookDTO getBookById(@PathVariable Long id){
+        return service.getById(id)
+                .map(book -> modelMapper.map(book, BookDTO.class))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 }

@@ -5,6 +5,8 @@ import com.dev.unitests.model.entity.Book;
 import com.dev.unitests.repository.BookRepository;
 import com.dev.unitests.service.BookService;
 
+import java.util.Optional;
+
 public class BookServiceImpl implements BookService {
 
     private BookRepository repository;
@@ -19,5 +21,10 @@ public class BookServiceImpl implements BookService {
             throw new BusinessException("Isbn já cadastrado");
         }
         return repository.save(book);
+    }
+
+    @Override
+    public Optional<Book> getById(Long id) {
+        return Optional.empty();
     }
 }
