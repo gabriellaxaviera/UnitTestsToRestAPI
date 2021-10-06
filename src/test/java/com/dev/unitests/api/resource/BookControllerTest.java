@@ -156,7 +156,7 @@ public class BookControllerTest {
 
         //neste cenario estamos buildando um livro apenas com id devido a busca
         BDDMockito.given(service.getById(anyLong()))
-                .willReturn(Optional.of(Book.builder().id(1l).build()));
+                .willReturn(Optional.of(Book.builder().id(1L).build()));
 
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders
                 .delete(BOOK_API.concat("/" + 1));
@@ -165,8 +165,22 @@ public class BookControllerTest {
                 .andExpect(status().isNoContent());
     }
 
+    @Test
+    @DisplayName("Deve retornar resource not found quando nao entrar livro para deletar")
+    public void deleteBookWithFailTest() throws Exception {
+
+        //neste cenario estamos buildando um livro apenas com id devido a busca
+        BDDMockito.given(service.getById(anyLong()))
+                .willReturn(Optional.empty());
+
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .delete(BOOK_API.concat("/" + 1));
+
+        mvc.perform(request)
+                .andExpect(status().isNotFound());
+    }
     private Book getBook() {
-        return Book.builder().id(10l).author("Artur").title("As aventuras").isbn("001").build();
+        return Book.builder().id(10L).author("Artur").title("As aventuras").isbn("001").build();
     }
 
     private BookDTO createNewBook() {
