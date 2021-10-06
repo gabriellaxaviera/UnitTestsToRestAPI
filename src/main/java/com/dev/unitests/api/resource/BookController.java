@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/books")
@@ -29,7 +28,7 @@ public class BookController {
     }
 
     @GetMapping("/{id}")
-    public BookDTO getBookById(@PathVariable Long id){
+    public BookDTO getBookById(@PathVariable Long id) {
         return service.getById(id)
                 .map(book -> modelMapper.map(book, BookDTO.class))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -37,8 +36,17 @@ public class BookController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteBookById(@PathVariable Long id){
+    public void deleteBookById(@PathVariable Long id) {
         Book book = service.getById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         service.delete(book);
+    }
+
+    @PutMapping("/{id}")
+    public BookDTO update(@PathVariable Long id, @RequestBody @Valid BookDTO dto) {
+        Book book = service.getById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        book.setAuthor(dto.getAuthor());
+        book.setTitle(dto.getTitle());
+        service.update(book);
+        return modelMapper.map(book, BookDTO.class);
     }
 }
