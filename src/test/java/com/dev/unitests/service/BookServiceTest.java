@@ -76,7 +76,7 @@ public class BookServiceTest {
         Optional<Book> byId = bookService.getById(id);
 
         //verificacoes
-        assertNotNull(byId);
+        assertNotNull(byId.get());
         assertEquals(id, byId.get().getId());
         assertEquals("Artur", byId.get().getAuthor());
         assertEquals("123", byId.get().getIsbn());

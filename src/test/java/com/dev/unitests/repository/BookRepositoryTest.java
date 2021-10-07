@@ -10,8 +10,9 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
@@ -52,12 +53,23 @@ public class BookRepositoryTest {
         assertFalse(exists);
     }
 
-    private Book getBook() {
-        return Book.builder().author("Artur").title("As aventuras").isbn("123").build();
+    @Test
+    @DisplayName("Deve retornar um livro por id")
+    public void returnBookById() {
+        //cenario
+        Book book = createNewBook("123");
+        entityManager.persist(book);
+
+        //execucao
+        Optional<Book> byId = bookRepository.findById(book.getId());
+
+        //verificacoes
+        assertTrue(byId.isPresent());
+
     }
 
     public static Book createNewBook(String isbn) {
-        return Book.builder().title("Aventuras").author("Fulano").isbn(isbn).build();
+        return Book.builder().title("As Aventuras").author("Fulano").isbn(isbn).build();
     }
 
 }
