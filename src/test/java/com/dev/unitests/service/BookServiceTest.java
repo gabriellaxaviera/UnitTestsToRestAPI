@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -116,6 +117,42 @@ public class BookServiceTest {
         assertThrows(IllegalAccessException.class, () -> bookService.delete(book));
 
         verify(bookRepository, never()).delete(book);
+    }
+
+    @Test
+    @DisplayName("Deve atualizar um livro.")
+    public void updateBookTest(){
+        //cenário
+        long id = 3L;
+
+        //livro a atualizar
+        Book updatingBook = Book.builder().id(id).build();
+
+        //simulacao
+        Book updatedBook = savedBook();
+        updatedBook.setId(id);
+
+        when(bookRepository.save(updatingBook)).thenReturn(updatedBook);
+
+        //exeucao
+        Book book = bookService.update(updatingBook);
+
+        //verificacoes
+        assertEquals(book.getId(), updatedBook.getId());
+        assertEquals(book.getTitle(), updatedBook.getTitle());
+        assertEquals(book.getIsbn(), updatedBook.getIsbn());
+        assertEquals(book.getAuthor(), updatedBook.getAuthor());
+
+    }
+
+    @Test
+    @DisplayName("Deve ocorrer erro ao tentar atualizar um livro inexistente.")
+    public void updateInvalidBookTest() {
+        Book book = new Book();
+
+        assertThrows(IllegalAccessException.class, () -> bookService.update(book));
+
+        verify(bookRepository, never()).save(book);
     }
 
     private Book getBook() {
