@@ -4,6 +4,7 @@ import com.dev.unitests.exception.BusinessException;
 import com.dev.unitests.model.entity.Book;
 import com.dev.unitests.repository.BookRepository;
 import com.dev.unitests.service.BookService;
+import lombok.SneakyThrows;
 
 import java.util.Optional;
 
@@ -17,7 +18,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Book save(Book book) {
-        if(repository.existsByIsbn(book.getIsbn())){
+        if (repository.existsByIsbn(book.getIsbn())) {
             throw new BusinessException("Isbn já cadastrado");
         }
         return repository.save(book);
@@ -28,12 +29,21 @@ public class BookServiceImpl implements BookService {
         return this.repository.findById(id);
     }
 
+    @SneakyThrows
     @Override
     public void delete(Book book) {
+        if (book.getId() == null || book == null) {
+            throw new IllegalAccessException("Book id cannot be null");
+        }
+        this.repository.delete(book);
     }
 
+    @SneakyThrows
     @Override
     public Book update(Book book) {
-        return null;
+        if (book.getId() == null || book == null) {
+            throw new IllegalAccessException("Book id cannot be null");
+        }
+        return this.repository.save(book);
     }
 }

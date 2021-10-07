@@ -14,6 +14,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -95,6 +96,26 @@ public class BookServiceTest {
 
         //verificacoes
         assertNotNull(byId);
+    }
+
+    @Test
+    @DisplayName("Deve obter um livro por Id")
+    public void deletBookById() {
+        Book book = savedBook();
+
+        assertDoesNotThrow(() -> bookService.delete(book));
+
+        verify(bookRepository, times(1)).delete(book);
+    }
+
+    @Test
+    @DisplayName("Deve obter um livro por Id")
+    public void deletBookWithErrorNotFoundById() {
+        Book book = new Book();
+
+        assertThrows(IllegalAccessException.class, () -> bookService.delete(book));
+
+        verify(bookRepository, never()).delete(book);
     }
 
     private Book getBook() {
