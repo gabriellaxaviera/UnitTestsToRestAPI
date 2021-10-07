@@ -12,6 +12,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -61,6 +63,38 @@ public class BookServiceTest {
 
         assertThrows(BusinessException.class, () -> bookService.save(book));
         verify(bookRepository, never()).save(book);
+    }
+
+    @Test
+    @DisplayName("Deve obter um livro por Id")
+    public void getBookById() {
+        //cernario
+        Long id = 1L;
+
+        when(bookRepository.findById(id)).thenReturn(Optional.of(savedBook()));
+        //execucao
+        Optional<Book> byId = bookService.getById(id);
+
+        //verificacoes
+        assertNotNull(byId);
+        assertEquals(id, byId.get().getId());
+        assertEquals("Artur", byId.get().getAuthor());
+        assertEquals("123", byId.get().getIsbn());
+        assertEquals("As aventuras", byId.get().getTitle());
+    }
+
+    @Test
+    @DisplayName("Deve retornar vazio quando o id do livro nao existe na base")
+    public void getBookEmptyById() {
+        //cernario
+        Long id = 1L;
+
+        when(bookRepository.findById(id)).thenReturn(Optional.empty());
+        //execucao
+        Optional<Book> byId = bookService.getById(id);
+
+        //verificacoes
+        assertNotNull(byId);
     }
 
     private Book getBook() {

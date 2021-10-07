@@ -229,7 +229,7 @@ public class BookControllerTest {
     }
 
     private Book getBook() {
-        return Book.builder().id(10L).author("Artur").title("As aventuras").isbn("001").build();
+        return Book.builder().id(1L).author("Artur").title("As aventuras").isbn("001").build();
     }
 
     private BookDTO createNewBook() {
