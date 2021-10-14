@@ -10,9 +10,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -153,6 +158,29 @@ public class BookServiceTest {
         assertThrows(IllegalAccessException.class, () -> bookService.update(book));
 
         verify(bookRepository, never()).save(book);
+    }
+
+    @Test
+    @DisplayName("Deve filtrar livros pelas propriedades")
+    public void findBookTest(){
+        //cenario
+        Book book = getBook();
+
+        PageRequest pageable = PageRequest.of(0, 10);
+
+        Page<Book> page = new PageImpl<>(Arrays.asList(book), pageable, 1);
+
+        when(bookRepository.findAll(any(Example.class), any(PageRequest.class)))
+                .thenReturn(page);
+
+        //execucao
+        Page<Book> bookPage = bookService.find(book, pageable);
+
+        //verificacoes
+        assertEquals(1, bookPage.getTotalElements());
+        assertEquals(Arrays.asList(book),bookPage.getContent());
+        assertEquals(0, bookPage.getPageable().getPageNumber());
+        assertEquals(10, bookPage.getPageable().getPageSize());
     }
 
     private Book getBook() {

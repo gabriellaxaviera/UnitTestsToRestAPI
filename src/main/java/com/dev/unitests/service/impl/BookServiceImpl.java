@@ -5,6 +5,10 @@ import com.dev.unitests.model.entity.Book;
 import com.dev.unitests.repository.BookRepository;
 import com.dev.unitests.service.BookService;
 import lombok.SneakyThrows;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 
@@ -45,5 +49,16 @@ public class BookServiceImpl implements BookService {
             throw new IllegalAccessException("Book id cannot be null");
         }
         return this.repository.save(book);
+    }
+
+    @Override
+    public Page<Book> find(Book filter, Pageable pageRequest) {
+        Example<Book> example = Example.of
+                (filter, ExampleMatcher.matching()
+                        .withIgnoreCase()
+                        .withIgnoreNullValues()
+                        .withStringMatcher(ExampleMatcher.StringMatcher.STARTING));
+
+        return repository.findAll(example, pageRequest);
     }
 }
