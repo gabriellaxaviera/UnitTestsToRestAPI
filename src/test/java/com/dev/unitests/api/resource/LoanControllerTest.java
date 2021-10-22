@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(SpringExtension.class)
@@ -68,6 +69,28 @@ public class LoanControllerTest {
         //validacao
         mockMvc.perform(request)
                 .andExpect(status().isCreated())
-                .andExpect(content().string("0"));
+                .andExpect(content().string("1"));
+    }
+
+    @Test
+    @DisplayName("Deve retornar erro ao tentar fazer emprestimo de um livro inexistente.")
+    public void invalidIsbnCreateLoanTest() throws Exception {
+        //cenario
+        LoanDTO loanDTO = LoanDTO.builder().isbn("123").customer("Gabi").build();
+        String json = new ObjectMapper().writeValueAsString(loanDTO);
+
+        BDDMockito.given(bookService.getBookByIsbn("123")).willReturn(Optional.empty());
+
+        //execucao
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(LOAN_API)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json);
+
+        //validacao
+        mockMvc.perform(request)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("errors", hasSize(1)))
+                .andExpect(jsonPath("errors[0]").value("Book not found for passed isbn"));
     }
 }
