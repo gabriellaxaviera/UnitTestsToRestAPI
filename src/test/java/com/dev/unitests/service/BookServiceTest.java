@@ -183,6 +183,21 @@ public class BookServiceTest {
         assertEquals(10, bookPage.getPageable().getPageSize());
     }
 
+    @Test
+    @DisplayName("Deve obterum livro pelo isbn")
+    public void getBookByIsbnTest(){
+        String isbn = "1230";
+        when(bookRepository.findByIsbn(isbn))
+                .thenReturn(Optional.of(Book.builder().id(1L).isbn(isbn).build()));
+
+        Optional<Book> bookByIsbn = bookService.getBookByIsbn(isbn);
+
+        assertTrue(bookByIsbn.isPresent());
+        assertEquals(1L, bookByIsbn.get().getId());
+        assertEquals("1230", bookByIsbn.get().getIsbn());
+    }
+
+
     private Book getBook() {
         return Book.builder().author("Artur").title("As aventuras").isbn("123").build();
     }
