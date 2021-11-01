@@ -1,5 +1,6 @@
 package com.dev.unitests.service;
 
+import com.dev.unitests.exception.BusinessException;
 import com.dev.unitests.model.entity.Book;
 import com.dev.unitests.model.entity.Loan;
 import com.dev.unitests.repository.LoanRepository;
@@ -16,7 +17,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
@@ -57,5 +60,24 @@ public class LoanServiceTest {
         assertEquals(1L, loan.getId());
         assertEquals(1L, loan.getBook().getId());
         assertEquals("gabi", loan.getCustomer());
+    }
+
+    @Test
+    @DisplayName("Deve lançar errod de negocio ao salvar um livro ja emprestado")
+    public void shouldNotSaveLoanTest() {
+        Book book = Book.builder().id(1L).build();
+
+        Loan savindLoan = Loan.builder()
+                .book(book)
+                .customer("gabi")
+                .loanDate(LocalDate.now())
+                .build();
+
+        when(repository.existsByBookAndNotReturned(book)).thenReturn(true); //se existe emprestimo para esse livro
+
+        Throwable exception = catchThrowable(() -> loanService.save(savindLoan));
+
+        assertEquals("Book already loaned",exception.getMessage());
+        verify(repository, never()).save(savindLoan);
     }
 }
