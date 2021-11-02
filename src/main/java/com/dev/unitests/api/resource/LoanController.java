@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -57,7 +57,7 @@ public class LoanController {
     }
 
     @GetMapping
-    public Page<LoanDTO> findLoan(LoanFilterDTO dto, PageRequest pageRequest) {
+    public Page<LoanDTO> find(LoanFilterDTO dto, Pageable pageRequest) {
         Page<Loan> result = service.find(dto, pageRequest);
         List<LoanDTO> loans = result
                 .getContent()
@@ -69,7 +69,6 @@ public class LoanController {
                     loanDTO.setBook(bookDTO);
                     return loanDTO;
                 }).collect(Collectors.toList());
-
         return new PageImpl<>(loans, pageRequest, result.getTotalElements());
     }
 }
