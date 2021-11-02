@@ -1,6 +1,5 @@
 package com.dev.unitests.service;
 
-import com.dev.unitests.exception.BusinessException;
 import com.dev.unitests.model.entity.Book;
 import com.dev.unitests.model.entity.Loan;
 import com.dev.unitests.repository.LoanRepository;
@@ -9,16 +8,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
@@ -31,7 +31,7 @@ public class LoanServiceTest {
     LoanService loanService;
 
     @BeforeEach
-    public void setup(){
+    public void setup() {
         this.loanService = new LoanServiceImpl(repository);
     }
 
@@ -68,7 +68,7 @@ public class LoanServiceTest {
     public void shouldNotSaveLoanTest() {
         Book book = Book.builder().id(1L).build();
 
-        Loan savindLoan = Loan.builder()
+        Loan savingLoan = Loan.builder()
                 .book(book)
                 .customer("gabi")
                 .loanDate(LocalDate.now())
@@ -76,9 +76,54 @@ public class LoanServiceTest {
 
         when(repository.existsByBookAndNotReturned(book)).thenReturn(true); //se existe emprestimo para esse livro
 
-        Throwable exception = catchThrowable(() -> loanService.save(savindLoan));
+        Throwable exception = catchThrowable(() -> loanService.save(savingLoan));
 
-        assertEquals("Book already loaned",exception.getMessage());
-        verify(repository, never()).save(savindLoan);
+        assertEquals("Book already loaned", exception.getMessage());
+        verify(repository, never()).save(savingLoan);
+    }
+
+    @Test
+    @DisplayName(" Deve obter as informações de um empréstimo pelo ID")
+    public void getLoanDetaisTest() {
+        //cenário
+        Long id = 1L;
+        Loan loan = createLoan();
+        loan.setId(id); //simula o que foi salvo no banco
+
+        Mockito.when(repository.findById(id)).thenReturn(Optional.of(loan));
+
+        //execucao
+        Optional<Loan> result = loanService.getById(id);
+
+        assertTrue(result.isPresent());
+        assertEquals(id, result.get().getId());
+        assertEquals(loan.getCustomer(), result.get().getCustomer());
+        assertEquals(loan.getBook(), result.get().getBook());
+    }
+
+    @Test
+    @DisplayName("Deve atualizar um empréstimo.")
+    public void updateLoanTest() {
+        Loan loan = createLoan();
+        loan.setId(1L);
+        loan.setReturned(true);
+
+        when(repository.save(loan)).thenReturn(loan);
+
+        Loan updatedLoan = loanService.update(loan);
+
+        assertTrue(updatedLoan.getReturned());
+        verify(repository).save(loan);
+    }
+
+    public static Loan createLoan() {
+        Book book = Book.builder().id(1L).build();
+        String customer = "Fulano";
+
+        return Loan.builder()
+                .book(book)
+                .customer(customer)
+                .loanDate(LocalDate.now())
+                .build();
     }
 }
