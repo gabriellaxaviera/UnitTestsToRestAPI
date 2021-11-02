@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 @WebMvcTest(controllers = LoanController.class)
 @AutoConfigureMockMvc
-public class LoanControllerTest {
+class LoanControllerTest {
 
     static final String LOAN_API = "/api/loans";
 
@@ -54,7 +54,7 @@ public class LoanControllerTest {
 
     @Test
     @DisplayName("Deve realizar um emprestimo")
-    public void createLoanTest() throws Exception {
+    void createLoanTest() throws Exception {
         //cenario
         LoanDTO loanDTO = getLoanDTO();
         String json = new ObjectMapper().writeValueAsString(loanDTO);
@@ -80,7 +80,7 @@ public class LoanControllerTest {
 
     @Test
     @DisplayName("Deve retornar erro ao tentar fazer emprestimo de um livro inexistente.")
-    public void invalidIsbnCreateLoanTest() throws Exception {
+    void invalidIsbnCreateLoanTest() throws Exception {
         //cenario
         LoanDTO loanDTO = getLoanDTO();
         String json = new ObjectMapper().writeValueAsString(loanDTO);
@@ -102,7 +102,7 @@ public class LoanControllerTest {
 
     @Test
     @DisplayName("Deve retornar erro ao tentar fazer emprestimo de um livro emprestado.")
-    public void loanedBookErrorOnCreateLoanTest() throws Exception {
+    void loanedBookErrorOnCreateLoanTest() throws Exception {
 
         LoanDTO dto = getLoanDTO();
         String json = new ObjectMapper().writeValueAsString(dto);
@@ -126,7 +126,7 @@ public class LoanControllerTest {
 
     @Test
     @DisplayName("Deve retornar um livro")
-    public void returnedBookTest() throws Exception {
+    void returnedBookTest() throws Exception {
         ReturnedLoanDTO dto = ReturnedLoanDTO.builder().returned(true).build();
 
         BDDMockito.given(loanService.getById(anyLong()))
@@ -146,7 +146,7 @@ public class LoanControllerTest {
 
     @Test
     @DisplayName("Deve retornar 404 ao tentar devolver um livro inexistente")
-    public void returnedInexistentBookTest() throws Exception {
+    void returnedInexistentBookTest() throws Exception {
         ReturnedLoanDTO dto = ReturnedLoanDTO.builder().returned(true).build();
 
         BDDMockito.given(loanService.getById(anyLong()))
