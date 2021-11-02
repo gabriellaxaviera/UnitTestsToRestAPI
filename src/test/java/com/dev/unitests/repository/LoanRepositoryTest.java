@@ -33,7 +33,7 @@ public class LoanRepositoryTest {
     @Test
     @DisplayName("deve verificar se existe empréstimo não devolvido para o livro.")
     public void existsByBookAndNotReturnedTest() {
-        Loan loan = createAndPersistLoan(LocalDate.now());
+        Loan loan = createAndPersistLoan();
         Book book = loan.getBook();
 
         //execucao
@@ -45,7 +45,7 @@ public class LoanRepositoryTest {
     @Test
     @DisplayName("Deve buscar empréstimo pelo isbn do livro ou customer")
     public void findByBookIsbnOrCustomerTest(){
-        Loan loan = createAndPersistLoan(LocalDate.now());
+        Loan loan = createAndPersistLoan();
 
         Page<Loan> result = repository.findByBookIsbnOrCustomer(
                 "123", "Fulano", PageRequest.of(0, 10));
@@ -57,11 +57,11 @@ public class LoanRepositoryTest {
         assertEquals(1, result.getTotalElements());
     }
 
-    private Loan createAndPersistLoan(LocalDate loanDate) {
+    private Loan createAndPersistLoan() {
         Book book = createNewBook("123");
         entityManager.persist(book);
 
-        Loan loan = Loan.builder().book(book).customer("Fulano").loanDate(loanDate).build();
+        Loan loan = Loan.builder().book(book).customer("Fulano").loanDate(LocalDate.now()).build();
         entityManager.persist(loan);
 
         return loan;
