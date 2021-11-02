@@ -4,6 +4,7 @@ import com.dev.unitests.api.dto.BookDTO;
 import com.dev.unitests.model.entity.Book;
 import com.dev.unitests.service.BookService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/books")
 @RequiredArgsConstructor
+@Slf4j //log
 public class BookController {
 
     private final BookService service;
@@ -26,14 +28,16 @@ public class BookController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public BookDTO create(@RequestBody @Valid BookDTO dto) {
+    public BookDTO createBook(@RequestBody @Valid BookDTO dto) {
         Book entity = modelMapper.map(dto, Book.class);
         entity = service.save(entity);
+        log.info("Crating book with isbn: {}", dto.getIsbn());
         return modelMapper.map(entity, BookDTO.class);
     }
 
     @GetMapping("/{id}")
-    public BookDTO getBookById(@PathVariable Long id) {
+    public BookDTO getBookDetailsById(@PathVariable Long id) {
+        log.info("Trying to obtains book with id: {}", id);
         return service.getById(id)
                 .map(book -> modelMapper.map(book, BookDTO.class))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -43,14 +47,16 @@ public class BookController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteBookById(@PathVariable Long id) {
         Book book = service.getById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        log.info("Deleting book with id: {}", id);
         service.delete(book);
     }
 
     @PutMapping("/{id}")
-    public BookDTO update(@PathVariable Long id, @RequestBody @Valid BookDTO dto) {
+    public BookDTO updateBookAuthorOrTitleIfFoundId(@PathVariable Long id, @RequestBody @Valid BookDTO dto) {
         Book book = service.getById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         book.setAuthor(dto.getAuthor());
         book.setTitle(dto.getTitle());
+        log.info("Updating book with id: {} and isbn: {}", id, dto.getIsbn());
         service.update(book);
         return modelMapper.map(book, BookDTO.class);
     }
