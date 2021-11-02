@@ -1,5 +1,6 @@
 package com.dev.unitests.service;
 
+import com.dev.unitests.api.dto.LoanFilterDTO;
 import com.dev.unitests.model.entity.Book;
 import com.dev.unitests.model.entity.Loan;
 import com.dev.unitests.repository.LoanRepository;
@@ -10,10 +11,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -116,8 +122,36 @@ public class LoanServiceTest {
         verify(repository).save(loan);
     }
 
+    @Test
+    @DisplayName("Deve filtrar empréstimos pelas propriedades")
+    public void findLoanTest() {
+        //cenario
+        LoanFilterDTO loanFilterDTO = LoanFilterDTO.builder().customer("Fulano").isbn("321").build();
+
+        Loan loan = createLoan();
+        loan.setId(1L);
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        List<Loan> lista = Arrays.asList(loan);
+
+        Page<Loan> page = new PageImpl<>(lista, pageRequest, lista.size());
+        when(repository.findByBookIsbnOrCustomer(
+                Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.any(PageRequest.class)))
+                .thenReturn(page);
+
+        //execucao
+        Page<Loan> result = loanService.find(loanFilterDTO, pageRequest);
+
+        //verificacoes
+        assertEquals(1, result.getTotalElements());
+        assertEquals(lista, result.getContent());
+        assertEquals(0, result.getPageable().getPageNumber());
+        assertEquals(10, result.getPageable().getPageSize());
+    }
+
     public static Loan createLoan() {
-        Book book = Book.builder().id(1L).build();
+        Book book = Book.builder().id(1L).isbn("123").build();
         String customer = "Fulano";
 
         return Loan.builder()
