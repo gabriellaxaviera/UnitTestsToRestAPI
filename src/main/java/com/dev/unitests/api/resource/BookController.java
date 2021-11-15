@@ -1,8 +1,11 @@
 package com.dev.unitests.api.resource;
 
 import com.dev.unitests.api.dto.BookDTO;
+import com.dev.unitests.api.dto.LoanDTO;
 import com.dev.unitests.model.entity.Book;
+import com.dev.unitests.model.entity.Loan;
 import com.dev.unitests.service.BookService;
+import com.dev.unitests.service.LoanService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -25,6 +28,7 @@ public class BookController {
 
     private final BookService service;
     private final ModelMapper modelMapper;
+    private final LoanService loanService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -71,6 +75,22 @@ public class BookController {
                 .collect(Collectors.toList());
 
         return new PageImpl<>(list, pageRequest, result.getTotalElements());
+    }
+
+    @GetMapping("{id}/loans")
+    public Page<LoanDTO> loansByBook(@PathVariable Long id, Pageable pageable) {
+        Book book = service.getById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Page<Loan> result = loanService.getLoansByBook(book, pageable);
+        List<LoanDTO> list = result.getContent()
+                .stream()
+                .map(loan -> {
+                    Book loanBook = loan.getBook();
+                    BookDTO bookDTO = modelMapper.map(loanBook, BookDTO.class);
+                    LoanDTO loanDTO = modelMapper.map(loan, LoanDTO.class);
+                    loanDTO.setBook(bookDTO);
+                    return loanDTO;
+                }).collect(Collectors.toList());
+        return new PageImpl<>(list, pageable, result.getTotalElements());
     }
 
 }
