@@ -4,6 +4,7 @@ import com.dev.unitests.api.dto.BookDTO;
 import com.dev.unitests.exception.BusinessException;
 import com.dev.unitests.model.entity.Book;
 import com.dev.unitests.service.BookService;
+import com.dev.unitests.service.LoanService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
@@ -47,6 +48,9 @@ public class BookControllerTest {
 
     @MockBean
     BookService service;
+
+    @MockBean
+    LoanService loanService;
 
     @Test
     @DisplayName("Deve criar um livro com sucesso.")
