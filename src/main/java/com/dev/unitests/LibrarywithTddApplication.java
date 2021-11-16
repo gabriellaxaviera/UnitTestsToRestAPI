@@ -16,12 +16,6 @@ public class LibrarywithTddApplication {
 		return new ModelMapper();
 	}
 
-	@Scheduled(cron = "0 15 20 1/1 * ?")
-	public void agendamentos(){
-		System.out.println("AGENDAMENTO OK");
-
-	}
-
 	public static void main(String[] args) {
 		SpringApplication.run(LibrarywithTddApplication.class, args);
 	}

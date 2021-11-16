@@ -14,6 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static com.dev.unitests.repository.BookRepositoryTest.createNewBook;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,7 +34,7 @@ public class LoanRepositoryTest {
     @Test
     @DisplayName("deve verificar se existe empréstimo não devolvido para o livro.")
     public void existsByBookAndNotReturnedTest() {
-        Loan loan = createAndPersistLoan();
+        Loan loan = createAndPersistLoan(LocalDate.now());
         Book book = loan.getBook();
 
         //execucao
@@ -45,7 +46,7 @@ public class LoanRepositoryTest {
     @Test
     @DisplayName("Deve buscar empréstimo pelo isbn do livro ou customer")
     public void findByBookIsbnOrCustomerTest(){
-        Loan loan = createAndPersistLoan();
+        Loan loan = createAndPersistLoan(LocalDate.now());
 
         Page<Loan> result = repository.findByBookIsbnOrCustomer(
                 "123", "Fulano", PageRequest.of(0, 10));
@@ -57,11 +58,31 @@ public class LoanRepositoryTest {
         assertEquals(1, result.getTotalElements());
     }
 
-    private Loan createAndPersistLoan() {
+    @Test
+    @DisplayName("Deve obter emprestimos cuja data de emprestimo for menor a 3 dias e nao retornados")
+    public void findByLoanDateLessThanAndNotReturnedTest(){
+        Loan loan = createAndPersistLoan(LocalDate.now().minusDays(5));
+
+        List<Loan> loanDateLessThanAndNotReturned = repository.findByLoanDateLessThanAndNotReturned(LocalDate.now().minusDays(4));
+
+        assertEquals(1, loanDateLessThanAndNotReturned.size());
+    }
+
+    @Test
+    @DisplayName("Deve retornar vazio quando não houver emprestimos atrasados")
+    public void notFindByLoanDateLessThanAndNotReturnedTest(){
+        Loan loan = createAndPersistLoan(LocalDate.now());
+
+        List<Loan> loanDateLessThanAndNotReturned = repository.findByLoanDateLessThanAndNotReturned(LocalDate.now().minusDays(4));
+
+        assertEquals(0, loanDateLessThanAndNotReturned.size());
+    }
+
+    private Loan createAndPersistLoan(LocalDate localDate) {
         Book book = createNewBook("123");
         entityManager.persist(book);
 
-        Loan loan = Loan.builder().book(book).customer("Fulano").loanDate(LocalDate.now()).build();
+        Loan loan = Loan.builder().book(book).customer("Fulano").loanDate(localDate).build();
         entityManager.persist(loan);
 
         return loan;
